@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Socket.IO chat</title>
+    <style>
+        body {
+            margin: 0;
+            padding-bottom: 3rem;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        #form {
+            background: rgba(0, 0, 0, 0.15);
+            padding: 0.25rem;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            height: 3rem;
+            box-sizing: border-box;
+            backdrop-filter: blur(10px);
+        }
+
+        #input {
+            border: none;
+            padding: 0 1rem;
+            flex-grow: 1;
+            border-radius: 2rem;
+            margin: 0.25rem;
+        }
+
+        #input:focus {
+            outline: none;
+        }
+
+        #form>button {
+            background: #333;
+            border: none;
+            padding: 0 1rem;
+            margin: 0.25rem;
+            border-radius: 3px;
+            outline: none;
+            color: #fff;
+        }
+
+        #messages {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        #messages>li {
+            padding: 0.5rem 1rem;
+        }
+
+        #messages>li:nth-child(odd) {
+            background: #efefef;
+        }
+    </style>
+</head>
+
+
+<body>
+    <ul id="messages"></ul>
+    <form id="form" action="">
+        <input id="input" autocomplete="off" />
+        <button>Send</button>
+    </form>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
+    <script>
+        var socket = io();
+
+        var messages = document.getElementById('messages');
+        var form = document.getElementById('form');
+        var input = document.getElementById('input');
+
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+            //socket.emit('chat_message', 1);
+            if (input.value) {
+                socket.emit('chat_message', input.value);
+                input.value = '';
+            }
+        });
+
+        socket.on('chat_message', function (msg) {
+            console.log(msg);
+           // var message = document.getElementById('message').innerHTML = msg
+            // var item = document.createElement('li');
+            // item.textContent = msg;
+            // messages.appendChild(item);
+            var data = []
+            var labels = []
+            const values = msg.map((x) => {
+                data.push(x.value);
+                labels.push(x.occurrence);
+            })
+            // console.log(labels[labels.length - 1]);
+            // console.log(data);
+            // updatedData = [Math.random(), Math.random(), Math.random(), Math.random()];
+            // updatedLabel = [1, 2, 3, 4];
+            addData(myChart, data, labels[labels.length - 1]);
+        });
+    </script>
+
+    <canvas id="myChart" style="width:100%;max-width:700px"></canvas>
+    <script>
+        var xValues = [];
+
+        var ctx = document.getElementById("myChart");
+        var myChart = new Chart(ctx, {
+            type: "line",
+            data: {
+                labels: xValues,
+                datasets: [{
+                    data: [],
+                    borderColor: "red",
+                    fill: false
+                }]
+            },
+            options: {
+                legend: { display: false },
+                scales: {
+                    yAxes: [{
+                        display: true,
+                        ticks: {
+                            suggestedMin: 0,    // minimum will be 0, unless there is a lower value.
+                            // OR //
+                            beginAtZero: true   // minimum value will be 0.
+                        }
+                    }]
+                }
+            }
+        });
+        function addData(chart, label, data) {
+            chart.data.labels.push(label);
+            chart.data.datasets.forEach((dataset) => {
+                dataset.data.push(data);
+            });
+            chart.update();
+        }
+
+    </script>
+</body>
+
+</html>
