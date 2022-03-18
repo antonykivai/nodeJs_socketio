@@ -65,7 +65,7 @@
 <body>
     <ul id="messages"></ul>
     <form id="form" action="">
-        <input id="input" autocomplete="off" />
+        <input type="number" min="1" id="input" autocomplete="off" />
         <button>Send</button>
     </form>
     <script src="/socket.io/socket.io.js"></script>
@@ -87,22 +87,28 @@
         });
 
         socket.on('chat_message', function (msg) {
-            console.log(msg);
-           // var message = document.getElementById('message').innerHTML = msg
-            // var item = document.createElement('li');
-            // item.textContent = msg;
-            // messages.appendChild(item);
+            // var message = document.getElementById('message')
+            var item = document.createElement('li');
+            item.textContent = "Recorded input";
+            messages.appendChild(item);
+
+
             var data = []
             var labels = []
-            const values = msg.map((x) => {
-                data.push(x.value);
-                labels.push(x.occurrence);
-            })
-            // console.log(labels[labels.length - 1]);
-            // console.log(data);
+            const dataloop = Object.entries(msg)
+            for (const [key, value] of dataloop) {
+                labels.push(key);
+                data.push(value);
+            }
+            // const values = msg.map((x) => {
+            //     data.push(x.value);
+            //     labels.push(x.occurrence);
+            // })
+
             // updatedData = [Math.random(), Math.random(), Math.random(), Math.random()];
             // updatedLabel = [1, 2, 3, 4];
-            addData(myChart, data, labels[labels.length - 1]);
+            // addData(myChart, data, labels[labels.length - 1]);
+            addData(myChart, data, labels);
         });
     </script>
 
@@ -115,11 +121,13 @@
             type: "line",
             data: {
                 labels: xValues,
-                datasets: [{
-                    data: [],
-                    borderColor: "red",
-                    fill: false
-                }]
+                datasets: [
+                    {
+                        data: [],
+                        borderColor: "red",
+                        fill: false
+                    }
+                ]
             },
             options: {
                 legend: { display: false },
@@ -135,11 +143,12 @@
                 }
             }
         });
-        function addData(chart, label, data) {
-            chart.data.labels.push(label);
-            chart.data.datasets.forEach((dataset) => {
-                dataset.data.push(data);
-            });
+        function addData(chart, data, labels) {
+            chart.data.labels = labels;
+            // chart.data.datasets.forEach((dataset) => {
+            //     dataset.data.pus(data);
+            // });
+            chart.data.datasets[0].data = data
             chart.update();
         }
 
